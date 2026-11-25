@@ -46,10 +46,10 @@ def read(sprite, path):
 
 def run(sprite, cmd, timeout=300):
     rid = uuid.uuid4().hex[:8]
-    out, done = f"/tmp/sx-{rid}.out", f"/tmp/sx-{rid}.done"
+    out, done = f"/var/tmp/sx-{rid}.out", f"/var/tmp/sx-{rid}.done"
     script = f"#!/usr/bin/env bash\n[ -f {done} ] && exec sleep infinity\n( {cmd} ) > {out} 2>&1; echo $? > {done}\nexec sleep infinity\n"
-    write(sprite, f"/tmp/sx-{rid}.sh", script)
-    s, b = req("PUT", f"/{sprite}/services/sx-{rid}", body={"cmd": "bash", "args": [f"/tmp/sx-{rid}.sh"]}, query={"duration": "1s"})
+    write(sprite, f"/var/tmp/sx-{rid}.sh", script)
+    s, b = req("PUT", f"/{sprite}/services/sx-{rid}", body={"cmd": "bash", "args": [f"/var/tmp/sx-{rid}.sh"]}, query={"duration": "1s"})
     if s >= 300: sys.exit(f"service create failed {s}: {b[:200]}")
     start = time.time(); code = None
     while time.time() - start < timeout:

@@ -4,8 +4,8 @@
 # A snapshot restore wipes this service and its files, so each challenge starts clean.
 set -u
 ID="$1"
-OUT=/tmp/sensei/status.json
-mkdir -p /tmp/sensei
+OUT=/var/tmp/sensei/status.json   # /var/tmp is wiped by a restore; /tmp is not
+mkdir -p /var/tmp/sensei
 while :; do
   if /home/sprite/dojo/challenges.sh check "$ID" >/dev/null 2>&1; then fixed=true; else fixed=false; fi
   printf '{"challenge":"%s","fixed":%s,"t":%s}\n' "$ID" "$fixed" "$(date +%s)" > $OUT.tmp && mv $OUT.tmp $OUT

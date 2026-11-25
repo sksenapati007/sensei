@@ -39,7 +39,7 @@ Sensei is a personal training agent. It sabotages a real Linux server, then coac
 1. **Sensei breaks something.** A port gets stolen, a config gets a typo, a process starts eating every CPU. You only get the symptom.
 2. **You fix it in a real terminal.** A full Linux shell in your browser, on an isolated machine. Nothing you do can hurt anything else.
 3. **Sensei coaches.** Hints build on the commands you actually ran, in three steps: first the idea, then the tool, then the shape of the command. They never hand you the fix.
-4. **Reset, level up, repeat.** Sensei spots the fix within seconds, grades you (time and hints used), shows the toolbox you used, writes the result to your training journal, and restores the machine from a snapshot in about 2 seconds.
+4. **Reset, level up, repeat.** Sensei spots the fix within seconds, grades you (time and hints used), shows the toolbox you used, writes the result to your training journal, and restores the machine from a snapshot in seconds.
 
 ## Challenges
 
@@ -49,12 +49,12 @@ Sensei is a personal training agent. It sabotages a real Linux server, then coac
 | The deploy broke the shop | Configuration | Easy | Ready |
 | Every order fails | Files & storage | Medium | Ready |
 | The machine is crawling | Processes | Medium | Ready |
-| The shop can't reach its database | Ports & networking | Medium | Coming soon |
-| The disk is full | Files & storage | Medium | Coming soon |
-| It keeps dying | Scheduling | Hard | Coming soon |
-| Secrets are leaking | Security | Hard | Coming soon |
+| The shop can't reach its inventory | Ports & networking | Medium | Ready |
+| The disk is full | Files & storage | Medium | Ready |
+| It keeps dying | Scheduling | Hard | Ready |
+| Secrets are leaking | Security | Hard | Ready |
 
-Every breakage is scripted and verified: its check fails when the machine is broken and passes once it's fixed. The AI only chooses, coaches and grades; it never decides whether you succeeded.
+Every breakage is scripted and verified: its check fails when the machine is broken and passes once it's fixed. `dojo/selftest.sh` proves this for every challenge, and also proves that half-fixes don't count: deleting a file that a process still holds open doesn't free the disk, and hiding a leaked key without rotating it doesn't pass. The AI only chooses, coaches and grades; it never decides whether you succeeded.
 
 ## Architecture
 
@@ -64,7 +64,7 @@ Every breakage is scripted and verified: its check fails when the machine is bro
              • picks challenges, grades, levels up     • scripted breakages + checks
              • coaching via Ollama connector  ──────►  • watcher: is it fixed yet?
              • journal via GitHub connector            • browser terminal (ttyd)
-             • snapshot / restore via Sprites API      • reset from snapshot in ~2 s
+             • snapshot / restore via Sprites API      • reset from snapshot in seconds
 ```
 
 - **Two Sprites, on purpose.** The training machine gives the learner a real shell with admin rights, so it is a separate Sprite that can reach only the Ollama connector. It never sees the GitHub connector or the Sprites API token.
@@ -88,15 +88,16 @@ dojo/catalog.ts      challenges: symptom, hint ladder, hidden facts, lesson, ski
 dojo/challenges.sh   scripted breakages and checks (runs on the training machine)
 dojo/watch.sh        reports whether the current challenge is fixed
 dojo/terminal.sh     sets up the browser terminal (accessible DOM renderer) on a secret path
-dojo/shop/server.js  the victim app
+dojo/shop/           the victim: a small shop app plus the inventory service it depends on
+dojo/selftest.sh     reference fixes; proves each breakage fails, half-fixes fail, real fixes pass
 core/                shell, connector gateway, LLM, Sprites API client, ntfy, page shell
-tools/               remote-exec helper, terminal test, commit-via-connector helper
+tools/               remote-exec helper, self-test runner, terminal test, commit-via-connector helper
 ```
 
 ## Running your own
 
 1. Create two Sprites: a control Sprite and a training Sprite whose name is outside your connectors' access policy.
-2. On the training Sprite, install the shop (`dojo/challenges.sh setup`), install [ttyd](https://github.com/tsl0922/ttyd) and run `dojo/terminal.sh <secret>` to serve it as a Sprite service on a secret path, then save a snapshot.
+2. On the training Sprite, install the shop, its inventory service and cron (`dojo/challenges.sh setup`), install [ttyd](https://github.com/tsl0922/ttyd) and run `dojo/terminal.sh <secret>` to serve it as a Sprite service on a secret path, then save a snapshot. Run `tools/selftest-all.sh <training-sprite> <snapshot>` from the control Sprite to verify all challenges. Never leave `selftest.sh` on the training machine: it contains the answers.
 3. On the control Sprite, store a Sprites API token in `~/.config/hg/sprites-token` (mode 0600), add the Ollama and GitHub connectors, and run `node sensei/server.ts` as a Sprite service with:
    `HG_DOJO_SPRITE`, `HG_DOJO_GOLDEN` (snapshot id), `HG_DOJO_TERM` (terminal URL), `HG_PIN`, `HG_COOKIE_SECRET`, `HG_JOURNAL_REPO`, `HG_NTFY_TOPIC`, `HG_LLM=cloud`.
 

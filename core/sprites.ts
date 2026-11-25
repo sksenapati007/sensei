@@ -48,7 +48,8 @@ export async function deleteService(sprite: string, name: string) {
  */
 export async function run(sprite: string, cmd: string, timeoutMs = 120_000, keep = false): Promise<{ code: number | null; out: string }> {
   const id = randomBytes(4).toString("hex");
-  const out = `/tmp/sx-${id}.out`, done = `/tmp/sx-${id}.done`, script = `/tmp/sx-${id}.sh`;
+  // /var/tmp, not /tmp: /tmp is a separate volume that snapshots don't cover, so files there survive a restore.
+  const out = `/var/tmp/sx-${id}.out`, done = `/var/tmp/sx-${id}.done`, script = `/var/tmp/sx-${id}.sh`;
   await writeFile(sprite, script, `#!/usr/bin/env bash\n[ -f ${done} ] && exec sleep infinity\n( ${cmd} ) > ${out} 2>&1; echo $? > ${done}\nexec sleep infinity\n`, "0755");
   await putService(sprite, `sx-${id}`, "bash", [script]);
   const start = Date.now();

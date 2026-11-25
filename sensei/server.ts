@@ -72,7 +72,7 @@ async function startChallenge() {
 async function pollFixed(): Promise<void> {
   const s = load();
   if (s.phase !== "active" || !s.current) return;
-  const raw = await sprites.readFile(DOJO, "/tmp/sensei/status.json");
+  const raw = await sprites.readFile(DOJO, "/var/tmp/sensei/status.json");
   if (!raw) return;
   let st: { challenge: string; fixed: boolean };
   try { st = JSON.parse(raw); } catch { return; }
@@ -371,7 +371,7 @@ ${soon.map((c) => `<li><span class="t">${esc(c.title)}</span><span class="pill s
     <article class="tile"><p class="label">Rank</p><p class="stat">${BELTS[s.level]}</p><p>Level ${s.level} of 3</p></article>
     <article class="tile"><p class="label">Progress</p><p class="stat">${solvedIds.size} / ${total}</p>
       <div class="bar" role="progressbar" aria-label="Challenges solved" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${solvedIds.size}"><span style="width:${pct}%"></span></div>
-      <p>${CATALOG.length} ready now, ${PLANNED.length} coming soon</p></article>
+      <p>${PLANNED.length ? `${CATALOG.length} ready now, ${PLANNED.length} coming soon` : `All ${CATALOG.length} challenges ready`}</p></article>
     <article class="tile"><p class="label">Next up</p><p class="stat" style="font-size:1.25rem">${next ? esc(next.title) : "All done"}</p><p>${next ? `${LEVEL_NAME[next.level]} · ${esc(next.area)}` : "New challenges are on the way."}</p></article>
   </div>
   <article class="tile" style="margin-top:1rem"><h3>Skills you've used so far</h3>
