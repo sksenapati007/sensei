@@ -6,9 +6,31 @@ Sensei is a personal training agent. It sabotages a real Linux server, then coac
 
 **Live app:** https://shubu-sensei-b6vfx.sprites.app
 
-Powered by [Sprites.dev](https://sprites.dev) ([Fly.io](https://fly.io)). Built for Fly.io Hacksgiving 2026.
-
 > The landing page and roadmap are public. The dojo itself (the live terminal) is PIN-protected, because it is a real shell on a real machine.
+
+---
+
+## Screenshots
+
+**Mid-challenge:** the shop is down. A real terminal on the right, Sensei's first hint on the left.
+
+![Sensei dojo mid-challenge: the terminal shows an imposter python process on port 3000, and Sensei's first hint](docs/screenshots/dojo.png)
+
+**Solved:** grade, what actually happened, the lesson, and the toolbox you used.
+
+![Sensei after solving: stars, explanation, lesson and toolbox](docs/screenshots/solved.png)
+
+**Landing page and roadmap:** rank, progress, skills used so far, and what's next.
+
+![Sensei landing page](docs/screenshots/landing.png)
+
+![Sensei roadmap: rank, progress, next challenge and skills used](docs/screenshots/roadmap.png)
+
+**Challenges by skill area:** you see the symptom, never the answer, until you've fixed it.
+
+![Sensei challenges grouped by skill area](docs/screenshots/challenges.png)
+
+<img src="docs/screenshots/phone.png" alt="Sensei landing page on a phone" width="300">
 
 ---
 
@@ -65,6 +87,7 @@ sensei/server.ts     control app: landing page, dojo, challenge loop, coaching, 
 dojo/catalog.ts      challenges: symptom, hint ladder, hidden facts, lesson, skill area
 dojo/challenges.sh   scripted breakages and checks (runs on the training machine)
 dojo/watch.sh        reports whether the current challenge is fixed
+dojo/terminal.sh     sets up the browser terminal (accessible DOM renderer) on a secret path
 dojo/shop/server.js  the victim app
 core/                shell, connector gateway, LLM, Sprites API client, ntfy, page shell
 tools/               remote-exec helper, terminal test, commit-via-connector helper
@@ -73,7 +96,7 @@ tools/               remote-exec helper, terminal test, commit-via-connector hel
 ## Running your own
 
 1. Create two Sprites: a control Sprite and a training Sprite whose name is outside your connectors' access policy.
-2. On the training Sprite, install the shop (`dojo/challenges.sh setup`), start [ttyd](https://github.com/tsl0922/ttyd) as a Sprite service on a secret path, and save a snapshot.
+2. On the training Sprite, install the shop (`dojo/challenges.sh setup`), install [ttyd](https://github.com/tsl0922/ttyd) and run `dojo/terminal.sh <secret>` to serve it as a Sprite service on a secret path, then save a snapshot.
 3. On the control Sprite, store a Sprites API token in `~/.config/hg/sprites-token` (mode 0600), add the Ollama and GitHub connectors, and run `node sensei/server.ts` as a Sprite service with:
    `HG_DOJO_SPRITE`, `HG_DOJO_GOLDEN` (snapshot id), `HG_DOJO_TERM` (terminal URL), `HG_PIN`, `HG_COOKIE_SECRET`, `HG_JOURNAL_REPO`, `HG_NTFY_TOPIC`, `HG_LLM=cloud`.
 

@@ -20,6 +20,7 @@ button{font:inherit;font-weight:600;min-height:44px;padding:.5rem 1rem;border:0;
 button:focus-visible,input:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.875rem;background:var(--bg);padding:.75rem;border-radius:8px;border:1px solid var(--line)}
 .ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}.muted{color:var(--muted)}
+a{color:var(--accent);text-underline-offset:2px}
 </style>
 </head>
 <body><main>${body}</main></body>
